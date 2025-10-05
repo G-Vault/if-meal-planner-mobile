@@ -30,14 +30,14 @@ jobs:
         buildozer android debug
 
     - name: Upload APK
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: ifmealplanner-apk
         path: bin/*.apk
 
     - name: Upload logs
       if: failure()
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: buildozer-logs
         path: .buildozer/android/platform/build-armeabi-v7a/build.log
