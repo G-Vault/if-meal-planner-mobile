@@ -29,15 +29,29 @@ jobs:
       run: |
         buildozer android debug
 
+    - name: List build output
+      run: |
+        echo "Contents of bin directory:"
+        ls -la bin/ || echo "No bin directory found"
+        echo "Contents of buildozer directory:"
+        find .buildozer -name "*.apk" -type f || echo "No APK files found in .buildozer"
+
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: ifmealplanner-apk
-        path: bin/*.apk
+        path: |
+          bin/*.apk
+          .buildozer/android/platform/build-*/dists/*/bin/*.apk
+        if-no-files-found: warn
 
     - name: Upload logs
       if: failure()
       uses: actions/upload-artifact@v4
       with:
         name: buildozer-logs
-        path: .buildozer/android/platform/build-armeabi-v7a/build.log
+        path: |
+          .buildozer/android/platform/build-*/build.log
+          .buildozer/logs/
+          .buildozer/android/platform/build-*/dists/*/build.log
+        if-no-files-found: ignore
