@@ -41,7 +41,7 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y build-essential libssl-dev libffi-dev python3-dev
         sudo apt-get install -y autoconf libtool pkg-config zlib1g-dev libncurses5-dev
-        sudo apt-get install -y libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
+        sudo apt-get install -y libncursesw5-dev cmake git unzip
 
     - name: Install Python dependencies  
       run: |
