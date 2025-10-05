@@ -12,8 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     
     env:
-      ANDROID_SDK_ROOT: /opt/android-sdk
-      ANDROID_HOME: /opt/android-sdk
+      ANDROID_SDK_ROOT: ${{ github.workspace }}/.buildozer/android/platform/android-sdk
+      ANDROID_HOME: ${{ github.workspace }}/.buildozer/android/platform/android-sdk
       
     steps:
     - uses: actions/checkout@v3
@@ -29,19 +29,12 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
-    - name: Setup Android SDK
-      uses: android-actions/setup-android@v3
-      with:
-        api-level: 33
-        build-tools: 33.0.2
-        ndk: 25.2.9519653
-
     - name: Install system dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y build-essential libssl-dev libffi-dev python3-dev
         sudo apt-get install -y autoconf libtool pkg-config zlib1g-dev libncurses5-dev
-        sudo apt-get install -y libncursesw5-dev cmake git unzip
+        sudo apt-get install -y libncursesw5-dev cmake git unzip wget
 
     - name: Install Python dependencies  
       run: |
@@ -61,9 +54,29 @@ jobs:
         path: .buildozer
         key: buildozer-${{ hashFiles('buildozer.spec', '**/*.py') }}
 
+    - name: Setup Android SDK for Buildozer
+      run: |
+        # Create the SDK directory where buildozer expects it
+        mkdir -p $ANDROID_SDK_ROOT
+        cd $ANDROID_SDK_ROOT
+        
+        # Download and setup command line tools
+        wget -q https://dl.google.com/android/repository/commandlinetools-linux-10406996_latest.zip
+        unzip -q commandlinetools-linux-10406996_latest.zip
+        mkdir -p cmdline-tools/latest
+        mv cmdline-tools/* cmdline-tools/latest/ 2>/dev/null || true
+        
+        # Accept licenses and install components
+        yes | cmdline-tools/latest/bin/sdkmanager --licenses
+        cmdline-tools/latest/bin/sdkmanager "platforms;android-33" "build-tools;33.0.2" "platform-tools"
+        
+        # Verify installation
+        ls -la build-tools/
+        ls -la build-tools/33.0.2/
+
     - name: Build with Buildozer
       run: |
-        export PATH=$PATH:$ANDROID_SDK_ROOT/build-tools/33.0.2
+        export PATH=$PATH:$ANDROID_SDK_ROOT/build-tools/33.0.2:$ANDROID_SDK_ROOT/platform-tools
         buildozer android debug
 
     - name: List build output
